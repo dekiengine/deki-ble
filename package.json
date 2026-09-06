@@ -1,0 +1,11 @@
+{
+  "id": "deki-ble",
+  "displayName": "BLE (abstract)",
+  "minEngine": "0.10.0",
+  "buildDefine": "DEKI_PACKAGE_BLE",
+  "requires": [],
+  "features": [],
+  "dependencies": {
+    "espidf": []
+  }
+}
