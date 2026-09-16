@@ -3,10 +3,13 @@
 #include "IDekiBLE.h"
 #include "DekiBLEPackage.h"
 
+namespace DekiBle
+{
+
 /**
  * @brief Active-driver registry for BLE (single-instance).
  *
- * Mirrors the DekiWiFi / DekiHttp pattern: a platform integration package
+ * Mirrors the DekiWifi::DekiWiFi / DekiHttp pattern: a platform integration package
  * Consumers (game code, BLE-backed sensors, provisioning helpers) reach the
  * active driver via GetCurrent.
  *
@@ -22,3 +25,5 @@ public:
     static void      SetCurrent(IDekiBLE* driver);
     static IDekiBLE* GetCurrent();
 };
+
+}  // namespace DekiBle

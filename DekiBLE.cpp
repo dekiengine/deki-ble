@@ -1,5 +1,8 @@
 #include "DekiBLE.h"
 
+namespace DekiBle
+{
+
 namespace {
     IDekiBLE* s_Current = nullptr;
 }
@@ -13,3 +16,5 @@ IDekiBLE* DekiBLE::GetCurrent()
 {
     return s_Current;
 }
+
+}  // namespace DekiBle

@@ -4,6 +4,9 @@
 #include <cstdint>
 #include <cstddef>
 
+namespace DekiBle
+{
+
 /**
  * @brief Address type for a BLE peer.
  */
@@ -277,3 +280,5 @@ public:
     /// Initialize afterwards restarts from scratch.
     virtual void Shutdown() = 0;
 };
+
+}  // namespace DekiBle

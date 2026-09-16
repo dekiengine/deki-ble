@@ -7,29 +7,39 @@
 #include <deki/interop/Plugin.h>
 #include <deki/LogSystem.h>
 
-#ifdef DEKI_EDITOR
 extern void DekiBLE_RegisterComponents();
 extern int  DekiBLE_GetAutoComponentCount();
 extern const Deki::ComponentMeta* DekiBLE_GetAutoComponentMeta(int index);
+
+namespace DekiBle
+{
+
+#ifdef DEKI_EDITOR
 #endif
 
 static bool s_BLERegistered = false;
+
+
+}  // namespace DekiBle
+// The exports below are C symbols at global scope; the package's own
+// registration helpers and statics live in its namespace.
+using namespace DekiBle;
 
 extern "C" {
 
 DEKI_BLE_API int DekiBLE_EnsureRegistered(void)
 {
 #ifdef DEKI_EDITOR
-    if (s_BLERegistered) return DekiBLE_GetAutoComponentCount();
+    if (s_BLERegistered) return ::DekiBLE_GetAutoComponentCount();
     s_BLERegistered = true;
-    DekiBLE_RegisterComponents();
-    return DekiBLE_GetAutoComponentCount();
+    ::DekiBLE_RegisterComponents();
+    return ::DekiBLE_GetAutoComponentCount();
 #else
     return 0;
 #endif
 }
 
-DEKI_PLUGIN_API const char* DekiPlugin_GetName(void)    { return "Deki BLE Package"; }
+DEKI_PLUGIN_API const char* DekiPlugin_GetName(void)    { return "DekiRendering::Deki BLE Package"; }
 DEKI_PLUGIN_API const char* DekiPlugin_GetVersion(void)
 {
 #ifdef DEKI_PACKAGE_VERSION
@@ -54,10 +64,10 @@ DEKI_PLUGIN_API void DekiPlugin_Shutdown(void)
 }
 
 #ifdef DEKI_EDITOR
-DEKI_PLUGIN_API int  DekiPlugin_GetComponentCount(void) { return DekiBLE_GetAutoComponentCount(); }
+DEKI_PLUGIN_API int  DekiPlugin_GetComponentCount(void) { return ::DekiBLE_GetAutoComponentCount(); }
 DEKI_PLUGIN_API const Deki::ComponentMeta* DekiPlugin_GetComponentMeta(int index)
 {
-    return DekiBLE_GetAutoComponentMeta(index);
+    return ::DekiBLE_GetAutoComponentMeta(index);
 }
 #else
 DEKI_PLUGIN_API int  DekiPlugin_GetComponentCount(void) { return 0; }
@@ -68,7 +78,7 @@ DEKI_PLUGIN_API void DekiPlugin_RegisterComponents(void)
 {
 #ifdef DEKI_EDITOR
     int n = DekiBLE_EnsureRegistered();
-    DEKI_LOG_INFO("[deki-ble] DekiPlugin_RegisterComponents -> %d component(s)", n);
+    DEKI_LOG_INFO("[deki-ble] ::DekiPlugin_RegisterComponents -> %d component(s)", n);
 #endif
 }
 
@@ -78,3 +88,4 @@ DEKI_PLUGIN_API void DekiPlugin_RegisterComponents(void)
 // platform integration packages and call DekiBLE::SetCurrent themselves.
 
 }  // extern "C"
+
