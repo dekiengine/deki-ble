@@ -51,7 +51,6 @@ DEKI_PLUGIN_API const char* DekiPlugin_GetVersion(void)
 
 DEKI_PLUGIN_API int  DekiPlugin_Init(void)
 {
-    DEKI_LOG_INFO("[deki-ble] DekiPlugin_Init");
     return 0;
 }
 
@@ -77,8 +76,7 @@ DEKI_PLUGIN_API const Deki::ComponentMeta* DekiPlugin_GetComponentMeta(int) { re
 DEKI_PLUGIN_API void DekiPlugin_RegisterComponents(void)
 {
 #ifdef DEKI_EDITOR
-    int n = DekiBLE_EnsureRegistered();
-    DEKI_LOG_INFO("[deki-ble] ::DekiPlugin_RegisterComponents -> %d component(s)", n);
+    DekiBLE_EnsureRegistered();
 #endif
 }
 
