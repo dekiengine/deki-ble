@@ -7,9 +7,9 @@
 #include <deki/interop/Plugin.h>
 #include <deki/LogSystem.h>
 
-extern void DekiBLE_RegisterComponents();
-extern int DekiBLE_GetAutoComponentCount();
-extern const Deki::ComponentMeta* DekiBLE_GetAutoComponentMeta(int index);
+extern void DekiBLERegisterComponents();
+extern int DekiBLEGetAutoComponentCount();
+extern const Deki::ComponentMeta* DekiBLEGetAutoComponentMeta(int index);
 
 namespace DekiBle
 {
@@ -26,26 +26,26 @@ using namespace DekiBle;
 
 extern "C"
 {
-    DEKI_BLE_API int DekiBLE_EnsureRegistered(void)
+    DEKI_BLE_API int DekiBLEEnsureRegistered(void)
     {
 #ifdef DEKI_EDITOR
         if (s_BLERegistered)
         {
-            return ::DekiBLE_GetAutoComponentCount();
+            return ::DekiBLEGetAutoComponentCount();
         }
         s_BLERegistered = true;
-        ::DekiBLE_RegisterComponents();
-        return ::DekiBLE_GetAutoComponentCount();
+        ::DekiBLERegisterComponents();
+        return ::DekiBLEGetAutoComponentCount();
 #else
         return 0;
 #endif
     }
 
-    DEKI_PLUGIN_API const char* DekiPlugin_GetName(void)
+    DEKI_PLUGIN_API const char* DekiPluginGetName(void)
     {
         return "Deki BLE Package";
     }
-    DEKI_PLUGIN_API const char* DekiPlugin_GetVersion(void)
+    DEKI_PLUGIN_API const char* DekiPluginGetVersion(void)
     {
 #ifdef DEKI_PACKAGE_VERSION
         return DEKI_PACKAGE_VERSION;
@@ -54,12 +54,12 @@ extern "C"
 #endif
     }
 
-    DEKI_PLUGIN_API int DekiPlugin_Init(void)
+    DEKI_PLUGIN_API int DekiPluginInit(void)
     {
         return 0;
     }
 
-    DEKI_PLUGIN_API void DekiPlugin_Shutdown(void)
+    DEKI_PLUGIN_API void DekiPluginShutdown(void)
     {
         // Null the active driver so a hot-reload of the integration package that
         // owns it doesn't leave a dangling pointer to its vtable.
@@ -68,29 +68,29 @@ extern "C"
     }
 
 #ifdef DEKI_EDITOR
-    DEKI_PLUGIN_API int DekiPlugin_GetComponentCount(void)
+    DEKI_PLUGIN_API int DekiPluginGetComponentCount(void)
     {
-        return ::DekiBLE_GetAutoComponentCount();
+        return ::DekiBLEGetAutoComponentCount();
     }
-    DEKI_PLUGIN_API const Deki::ComponentMeta* DekiPlugin_GetComponentMeta(int index)
+    DEKI_PLUGIN_API const Deki::ComponentMeta* DekiPluginGetComponentMeta(int index)
     {
-        return ::DekiBLE_GetAutoComponentMeta(index);
+        return ::DekiBLEGetAutoComponentMeta(index);
     }
 #else
-    DEKI_PLUGIN_API int DekiPlugin_GetComponentCount(void)
+    DEKI_PLUGIN_API int DekiPluginGetComponentCount(void)
     {
         return 0;
     }
-    DEKI_PLUGIN_API const Deki::ComponentMeta* DekiPlugin_GetComponentMeta(int)
+    DEKI_PLUGIN_API const Deki::ComponentMeta* DekiPluginGetComponentMeta(int)
     {
         return nullptr;
     }
 #endif
 
-    DEKI_PLUGIN_API void DekiPlugin_RegisterComponents(void)
+    DEKI_PLUGIN_API void DekiPluginRegisterComponents(void)
     {
 #ifdef DEKI_EDITOR
-        DekiBLE_EnsureRegistered();
+        DekiBLEEnsureRegistered();
 #endif
     }
 

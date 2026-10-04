@@ -57,11 +57,11 @@ struct DekiBLEDevice
     int8_t rssi = 0;        // dBm
     char name[32] = { 0 };  // parsed Complete or Shortened Local Name, "" if absent
 
-    // Raw payloads. adv_data is always the primary 31-byte payload; scan_resp
+    // Raw payloads. advData is always the primary 31-byte payload; scanResp
     // is only populated for active scans where the advertiser answered.
-    uint8_t adv_data[31] = { 0 };
+    uint8_t advData[31] = { 0 };
     uint8_t advLen = 0;
-    uint8_t scan_resp[31] = { 0 };
+    uint8_t scanResp[31] = { 0 };
     uint8_t scanRespLen = 0;
 
     // Parsed convenience fields (also derivable from the raw bytes).
@@ -70,7 +70,7 @@ struct DekiBLEDevice
     uint8_t manufacturerDataLen = 0;
 
     // First few advertised service UUIDs. If the advertiser lists more, the
-    // tail is still parseable from adv_data.
+    // tail is still parseable from advData.
     DekiBLEUUID serviceUuids[4];
     uint8_t serviceUuidCount = 0;
 };
@@ -107,18 +107,18 @@ struct DekiBLEAdvData
  */
 enum DekiBLECharProps : uint8_t
 {
-    DekiBLECharProp_Read = 0x01,
-    DekiBLECharProp_Write = 0x02,
-    DekiBLECharProp_WriteNoResp = 0x04,
-    DekiBLECharProp_Notify = 0x08,
-    DekiBLECharProp_Indicate = 0x10,
+    DekiBLECharPropRead = 0x01,
+    DekiBLECharPropWrite = 0x02,
+    DekiBLECharPropWriteNoResp = 0x04,
+    DekiBLECharPropNotify = 0x08,
+    DekiBLECharPropIndicate = 0x10,
 };
 
 using DekiBLECharHandle = uint16_t;
 using DekiBLEConnHandle = uint16_t;
 
-static constexpr DekiBLECharHandle DekiBLEInvalidCharHandle = 0xFFFF;
-static constexpr DekiBLEConnHandle DekiBLEInvalidConnHandle = 0xFFFF;
+static constexpr DekiBLECharHandle kDekiBLEInvalidCharHandle = 0xFFFF;
+static constexpr DekiBLEConnHandle kDekiBLEInvalidConnHandle = 0xFFFF;
 
 /**
  * @brief Description of one characteristic to expose on the GATT server.
@@ -130,9 +130,9 @@ static constexpr DekiBLEConnHandle DekiBLEInvalidConnHandle = 0xFFFF;
 struct DekiBLECharSpec
 {
     DekiBLEUUID uuid;
-    uint8_t props = 0;                                         // bitmask of DekiBLECharProps
-    uint16_t maxLen = 20;                                      // typical default MTU payload
-    DekiBLECharHandle valueHandle = DekiBLEInvalidCharHandle;  // filled by BuildGattServer
+    uint8_t props = 0;                                          // bitmask of DekiBLECharProps
+    uint16_t maxLen = 20;                                       // typical default MTU payload
+    DekiBLECharHandle valueHandle = kDekiBLEInvalidCharHandle;  // filled by BuildGattServer
 };
 
 /**
@@ -257,7 +257,7 @@ public:
     virtual bool ReadRemote(DekiBLEConnHandle conn, DekiBLECharHandle handle, uint8_t* out, size_t* len) = 0;
 
     virtual bool WriteRemote(DekiBLEConnHandle conn, DekiBLECharHandle handle, const void* data, size_t len,
-                             bool with_response) = 0;
+                             bool withResponse) = 0;
 
     /// Subscribe/unsubscribe to notifications by writing the CCCD descriptor
     /// immediately after `handle`. Incoming notifications surface through
