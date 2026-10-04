@@ -12,10 +12,10 @@ namespace DekiBle
  */
 enum class DekiBLEAddrType : uint8_t
 {
-    Public                       = 0,
-    RandomStatic                 = 1,
-    RandomPrivateResolvable      = 2,
-    RandomPrivateNonResolvable   = 3,
+    Public = 0,
+    RandomStatic = 1,
+    RandomPrivateResolvable = 2,
+    RandomPrivateNonResolvable = 3,
 };
 
 /**
@@ -23,8 +23,8 @@ enum class DekiBLEAddrType : uint8_t
  */
 struct DekiBLEAddress
 {
-    uint8_t         bytes[6] = {0, 0, 0, 0, 0, 0};
-    DekiBLEAddrType type     = DekiBLEAddrType::Public;
+    uint8_t bytes[6] = { 0, 0, 0, 0, 0, 0 };
+    DekiBLEAddrType type = DekiBLEAddrType::Public;
 };
 
 /**
@@ -38,9 +38,9 @@ struct DekiBLEAddress
  */
 struct DekiBLEUUID
 {
-    uint8_t  bytes[16] = {0};
-    bool     is16bit   = false;
-    uint16_t shortId  = 0;
+    uint8_t bytes[16] = { 0 };
+    bool is16bit = false;
+    uint16_t shortId = 0;
 };
 
 /**
@@ -54,25 +54,25 @@ struct DekiBLEUUID
 struct DekiBLEDevice
 {
     DekiBLEAddress addr;
-    int8_t         rssi          = 0;            // dBm
-    char           name[32]      = {0};          // parsed Complete or Shortened Local Name, "" if absent
+    int8_t rssi = 0;        // dBm
+    char name[32] = { 0 };  // parsed Complete or Shortened Local Name, "" if absent
 
     // Raw payloads. adv_data is always the primary 31-byte payload; scan_resp
     // is only populated for active scans where the advertiser answered.
-    uint8_t        adv_data[31]    = {0};
-    uint8_t        advLen         = 0;
-    uint8_t        scan_resp[31]   = {0};
-    uint8_t        scanRespLen   = 0;
+    uint8_t adv_data[31] = { 0 };
+    uint8_t advLen = 0;
+    uint8_t scan_resp[31] = { 0 };
+    uint8_t scanRespLen = 0;
 
     // Parsed convenience fields (also derivable from the raw bytes).
-    uint16_t       manufacturerId          = 0xFFFF;   // 0xFFFF when absent
-    uint8_t        manufacturerData[27]    = {0};
-    uint8_t        manufacturerDataLen    = 0;
+    uint16_t manufacturerId = 0xFFFF;  // 0xFFFF when absent
+    uint8_t manufacturerData[27] = { 0 };
+    uint8_t manufacturerDataLen = 0;
 
     // First few advertised service UUIDs. If the advertiser lists more, the
     // tail is still parseable from adv_data.
-    DekiBLEUUID    serviceUuids[4];
-    uint8_t        serviceUuidCount       = 0;
+    DekiBLEUUID serviceUuids[4];
+    uint8_t serviceUuidCount = 0;
 };
 
 /**
@@ -85,21 +85,21 @@ struct DekiBLEDevice
  */
 struct DekiBLEAdvData
 {
-    const char*           localName              = nullptr;
-    const DekiBLEUUID*    serviceUuids           = nullptr;
-    uint8_t               serviceUuidCount      = 0;
+    const char* localName = nullptr;
+    const DekiBLEUUID* serviceUuids = nullptr;
+    uint8_t serviceUuidCount = 0;
 
-    uint16_t              manufacturerId         = 0xFFFF;  // 0xFFFF = omit
-    const uint8_t*        manufacturerData       = nullptr;
-    uint8_t               manufacturerDataLen   = 0;
+    uint16_t manufacturerId = 0xFFFF;  // 0xFFFF = omit
+    const uint8_t* manufacturerData = nullptr;
+    uint8_t manufacturerDataLen = 0;
 
-    bool                  connectable             = true;
-    uint16_t              intervalMs             = 100;     // valid range 20..10240
+    bool connectable = true;
+    uint16_t intervalMs = 100;  // valid range 20..10240
 
     // If non-null, bypass struct-driven encoding and broadcast these bytes
     // verbatim. rawOverrideLen must be <= 31.
-    const uint8_t*        rawOverride            = nullptr;
-    uint8_t               rawOverrideLen        = 0;
+    const uint8_t* rawOverride = nullptr;
+    uint8_t rawOverrideLen = 0;
 };
 
 /**
@@ -107,11 +107,11 @@ struct DekiBLEAdvData
  */
 enum DekiBLECharProps : uint8_t
 {
-    DekiBLECharProp_Read        = 0x01,
-    DekiBLECharProp_Write       = 0x02,
+    DekiBLECharProp_Read = 0x01,
+    DekiBLECharProp_Write = 0x02,
     DekiBLECharProp_WriteNoResp = 0x04,
-    DekiBLECharProp_Notify      = 0x08,
-    DekiBLECharProp_Indicate    = 0x10,
+    DekiBLECharProp_Notify = 0x08,
+    DekiBLECharProp_Indicate = 0x10,
 };
 
 using DekiBLECharHandle = uint16_t;
@@ -129,9 +129,9 @@ static constexpr DekiBLEConnHandle DekiBLEInvalidConnHandle = 0xFFFF;
  */
 struct DekiBLECharSpec
 {
-    DekiBLEUUID       uuid;
-    uint8_t           props       = 0;          // bitmask of DekiBLECharProps
-    uint16_t          maxLen     = 20;         // typical default MTU payload
+    DekiBLEUUID uuid;
+    uint8_t props = 0;                                         // bitmask of DekiBLECharProps
+    uint16_t maxLen = 20;                                      // typical default MTU payload
     DekiBLECharHandle valueHandle = DekiBLEInvalidCharHandle;  // filled by BuildGattServer
 };
 
@@ -140,24 +140,23 @@ struct DekiBLECharSpec
  */
 struct DekiBLEServiceSpec
 {
-    DekiBLEUUID      uuid;
-    DekiBLECharSpec* chars       = nullptr;
-    uint8_t          charCount  = 0;
+    DekiBLEUUID uuid;
+    DekiBLECharSpec* chars = nullptr;
+    uint8_t charCount = 0;
 };
 
 // =============================================================================
 // Callback typedefs
 // =============================================================================
 
-using DekiBLEScanCb       = void (*)(const DekiBLEDevice& device, void* user);
-using DekiBLEConnCb       = void (*)(DekiBLEConnHandle conn, const DekiBLEAddress& peer,
-                                     bool connected, void* user);
-using DekiBLECharWriteCb  = void (*)(DekiBLEConnHandle conn, DekiBLECharHandle handle,
-                                     const uint8_t* data, size_t len, void* user);
-using DekiBLECharReadCb   = int  (*)(DekiBLEConnHandle conn, DekiBLECharHandle handle,
-                                     uint8_t* out, size_t maxLen, void* user);
-using DekiBLENotifyCb     = void (*)(DekiBLEConnHandle conn, DekiBLECharHandle handle,
-                                     const uint8_t* data, size_t len, void* user);
+using DekiBLEScanCb = void (*)(const DekiBLEDevice& device, void* user);
+using DekiBLEConnCb = void (*)(DekiBLEConnHandle conn, const DekiBLEAddress& peer, bool connected, void* user);
+using DekiBLECharWriteCb = void (*)(DekiBLEConnHandle conn, DekiBLECharHandle handle, const uint8_t* data, size_t len,
+                                    void* user);
+using DekiBLECharReadCb = int (*)(DekiBLEConnHandle conn, DekiBLECharHandle handle, uint8_t* out, size_t maxLen,
+                                  void* user);
+using DekiBLENotifyCb = void (*)(DekiBLEConnHandle conn, DekiBLECharHandle handle, const uint8_t* data, size_t len,
+                                 void* user);
 
 /**
  * @brief Abstract BLE radio.
@@ -192,8 +191,7 @@ public:
     /// `active` requests scan responses; passive listening only when false.
     /// durationMs=0 means scan until StopScan; otherwise auto-stop after the
     /// duration elapses.
-    virtual bool StartScan(uint16_t intervalMs, uint16_t windowMs,
-                           bool active, uint32_t durationMs) = 0;
+    virtual bool StartScan(uint16_t intervalMs, uint16_t windowMs, bool active, uint32_t durationMs) = 0;
 
     virtual void StopScan() = 0;
 
@@ -226,8 +224,7 @@ public:
 
     /// Push a notification (or indication, if the characteristic was declared
     /// Indicate) to one connected central.
-    virtual bool NotifyValue(DekiBLEConnHandle conn, DekiBLECharHandle handle,
-                             const void* data, size_t len) = 0;
+    virtual bool NotifyValue(DekiBLEConnHandle conn, DekiBLECharHandle handle, const void* data, size_t len) = 0;
 
     virtual void SetCharWriteCallback(DekiBLECharWriteCb cb, void* user) = 0;
 
@@ -254,21 +251,18 @@ public:
     /// writes the first characteristic value handle into `outFirstHandle` and
     /// the number discovered into `outCount`. The returned handles are
     /// contiguous in attribute-handle order.
-    virtual bool DiscoverService(DekiBLEConnHandle conn, const DekiBLEUUID& service,
-                                 DekiBLECharHandle* outFirstHandle,
+    virtual bool DiscoverService(DekiBLEConnHandle conn, const DekiBLEUUID& service, DekiBLECharHandle* outFirstHandle,
                                  uint8_t* outCount) = 0;
 
-    virtual bool ReadRemote(DekiBLEConnHandle conn, DekiBLECharHandle handle,
-                            uint8_t* out, size_t* len) = 0;
+    virtual bool ReadRemote(DekiBLEConnHandle conn, DekiBLECharHandle handle, uint8_t* out, size_t* len) = 0;
 
-    virtual bool WriteRemote(DekiBLEConnHandle conn, DekiBLECharHandle handle,
-                             const void* data, size_t len, bool with_response) = 0;
+    virtual bool WriteRemote(DekiBLEConnHandle conn, DekiBLECharHandle handle, const void* data, size_t len,
+                             bool with_response) = 0;
 
     /// Subscribe/unsubscribe to notifications by writing the CCCD descriptor
     /// immediately after `handle`. Incoming notifications surface through
     /// the notify callback.
-    virtual bool Subscribe(DekiBLEConnHandle conn, DekiBLECharHandle handle,
-                           bool enable) = 0;
+    virtual bool Subscribe(DekiBLEConnHandle conn, DekiBLECharHandle handle, bool enable) = 0;
 
     virtual void SetNotifyCallback(DekiBLENotifyCb cb, void* user) = 0;
 

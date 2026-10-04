@@ -22,7 +22,7 @@ namespace DekiBle
 class DEKI_BLE_API DekiBLE
 {
 public:
-    static void      SetCurrent(IDekiBLE* driver);
+    static void SetCurrent(IDekiBLE* driver);
     static IDekiBLE* GetCurrent();
 };
 

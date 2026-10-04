@@ -3,8 +3,9 @@
 namespace DekiBle
 {
 
-namespace {
-    IDekiBLE* s_Current = nullptr;
+namespace
+{
+IDekiBLE* s_Current = nullptr;
 }
 
 void DekiBLE::SetCurrent(IDekiBLE* driver)
