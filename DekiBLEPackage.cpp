@@ -1,7 +1,4 @@
-/**
- * @file DekiBLEPackage.cpp
- * @brief Package entry point for deki-ble
- */
+// Package entry point for deki-ble.
 #include "DekiBLEPackage.h"
 #include "DekiBLE.h"
 #include <deki/interop/Plugin.h>
@@ -61,8 +58,8 @@ extern "C"
 
     DEKI_PLUGIN_API void DekiPluginShutdown(void)
     {
-        // Null the active driver so a hot-reload of the integration package that
-        // owns it doesn't leave a dangling pointer to its vtable.
+        // Clear the active driver, so a hot reload of the integration package
+        // that owns it leaves no dangling pointer to its vtable.
         DekiBLE::SetCurrent(nullptr);
         s_BLERegistered = false;
     }
@@ -94,8 +91,8 @@ extern "C"
 #endif
     }
 
-    // This package owns only the IDekiBLE interface and the SetCurrent/GetCurrent
-    // facade — it registers no provider of its own. Concrete drivers live in the
-    // platform integration packages and call DekiBLE::SetCurrent themselves.
+    // This package has only the IDekiBLE interface and SetCurrent/GetCurrent;
+    // it registers no provider. Drivers live in the platform integration
+    // packages, which call DekiBLE::SetCurrent themselves.
 
 }  // extern "C"

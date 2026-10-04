@@ -7,9 +7,7 @@
 namespace DekiBle
 {
 
-/**
- * @brief Address type for a BLE peer.
- */
+/// Address type of a BLE peer.
 enum class DekiBLEAddrType : uint8_t
 {
     Public = 0,
@@ -18,24 +16,19 @@ enum class DekiBLEAddrType : uint8_t
     RandomPrivateNonResolvable = 3,
 };
 
-/**
- * @brief 48-bit BLE device address.
- */
+/// 48-bit BLE device address.
 struct DekiBLEAddress
 {
     uint8_t bytes[6] = { 0, 0, 0, 0, 0, 0 };
     DekiBLEAddrType type = DekiBLEAddrType::Public;
 };
 
-/**
- * @brief BLE UUID. Stored canonically as 128-bit big-endian bytes.
- *
- * For SIG-assigned 16-bit UUIDs (e.g. 0x180D Heart Rate), set is16bit=true
- * and put the 16-bit value in shortId. The full 128-bit form is also filled
- * in (Bluetooth base UUID 00000000-0000-1000-8000-00805F9B34FB with the
- * short id spliced into bytes[2..3]) so backends that only consume bytes[]
- * still work.
- */
+/// BLE UUID, stored as 128-bit big-endian bytes.
+///
+/// For a SIG-assigned 16-bit UUID (e.g. 0x180D Heart Rate), set is16bit=true
+/// and put the value in shortId. Fill in the full 128-bit form too (the
+/// Bluetooth base UUID 00000000-0000-1000-8000-00805F9B34FB with the short id
+/// in bytes[2..3]), so backends that read only bytes[] still work.
 struct DekiBLEUUID
 {
     uint8_t bytes[16] = { 0 };
@@ -43,14 +36,12 @@ struct DekiBLEUUID
     uint16_t shortId = 0;
 };
 
-/**
- * @brief One BLE advertiser observed during a scan.
- *
- * Carries both the parsed-out common fields and the raw advertisement /
- * scan-response payloads. Use the parsed fields for the common cases
- * (name lookup, manufacturer id filter); fall back to the raw bytes when
- * you need to parse a custom AD type (iBeacon, Eddystone, vendor frames).
- */
+/// One BLE advertiser seen during a scan.
+///
+/// Has the common fields already parsed and the raw advertisement and scan
+/// response payloads. Use the parsed fields for the common cases (name,
+/// manufacturer id filter) and the raw bytes for a custom AD type (iBeacon,
+/// Eddystone, vendor frames).
 struct DekiBLEDevice
 {
     DekiBLEAddress addr;
@@ -58,31 +49,27 @@ struct DekiBLEDevice
     char name[32] = { 0 };  // parsed Complete or Shortened Local Name, "" if absent
 
     // Raw payloads. advData is always the primary 31-byte payload; scanResp
-    // is only populated for active scans where the advertiser answered.
+    // is filled only by an active scan the advertiser answered.
     uint8_t advData[31] = { 0 };
     uint8_t advLen = 0;
     uint8_t scanResp[31] = { 0 };
     uint8_t scanRespLen = 0;
 
-    // Parsed convenience fields (also derivable from the raw bytes).
+    // Parsed fields (also in the raw bytes).
     uint16_t manufacturerId = 0xFFFF;  // 0xFFFF when absent
     uint8_t manufacturerData[27] = { 0 };
     uint8_t manufacturerDataLen = 0;
 
-    // First few advertised service UUIDs. If the advertiser lists more, the
-    // tail is still parseable from advData.
+    // The first advertised service UUIDs. Any more are still in advData.
     DekiBLEUUID serviceUuids[4];
     uint8_t serviceUuidCount = 0;
 };
 
-/**
- * @brief What to broadcast when advertising.
- *
- * Fill the structured fields and the backend marshals them into a 31-byte
- * advertisement. Set rawOverride to push exact bytes instead (for iBeacon,
- * Eddystone, or any custom AD layout); the structured fields are ignored
- * when rawOverride != nullptr.
- */
+/// What to broadcast when advertising.
+///
+/// The backend packs the fields into a 31-byte advertisement. Set rawOverride
+/// to broadcast exact bytes instead (for iBeacon, Eddystone or any custom AD
+/// layout); the other fields are then ignored.
 struct DekiBLEAdvData
 {
     const char* localName = nullptr;
@@ -96,15 +83,13 @@ struct DekiBLEAdvData
     bool connectable = true;
     uint16_t intervalMs = 100;  // valid range 20..10240
 
-    // If non-null, bypass struct-driven encoding and broadcast these bytes
-    // verbatim. rawOverrideLen must be <= 31.
+    // When set, these bytes are broadcast as they are. rawOverrideLen must be
+    // <= 31.
     const uint8_t* rawOverride = nullptr;
     uint8_t rawOverrideLen = 0;
 };
 
-/**
- * @brief Characteristic property bitmask.
- */
+/// Characteristic property bitmask.
 enum DekiBLECharProps : uint8_t
 {
     DekiBLECharPropRead = 0x01,
@@ -120,13 +105,9 @@ using DekiBLEConnHandle = uint16_t;
 static constexpr DekiBLECharHandle kDekiBLEInvalidCharHandle = 0xFFFF;
 static constexpr DekiBLEConnHandle kDekiBLEInvalidConnHandle = 0xFFFF;
 
-/**
- * @brief Description of one characteristic to expose on the GATT server.
- *
- * The backend fills `valueHandle` during BuildGattServer; callers retain
- * that handle to call NotifyValue or to match against incoming write
- * callbacks.
- */
+/// One characteristic to expose on the GATT server. The backend fills
+/// `valueHandle` in BuildGattServer; callers keep it for NotifyValue and to
+/// match incoming write callbacks.
 struct DekiBLECharSpec
 {
     DekiBLEUUID uuid;
@@ -135,9 +116,7 @@ struct DekiBLECharSpec
     DekiBLECharHandle valueHandle = kDekiBLEInvalidCharHandle;  // filled by BuildGattServer
 };
 
-/**
- * @brief One GATT service plus its characteristics.
- */
+/// One GATT service and its characteristics.
 struct DekiBLEServiceSpec
 {
     DekiBLEUUID uuid;
@@ -158,24 +137,20 @@ using DekiBLECharReadCb = int (*)(DekiBLEConnHandle conn, DekiBLECharHandle hand
 using DekiBLENotifyCb = void (*)(DekiBLEConnHandle conn, DekiBLECharHandle handle, const uint8_t* data, size_t len,
                                  void* user);
 
-/**
- * @brief Abstract BLE radio.
- *
- * Covers the four BLE roles in one interface: scan (observer/central),
- * advertise (broadcaster/peripheral), GATT server, and GATT client. All
- * event-driven flows (scan results, GATT writes from a remote central,
- * incoming notifications) deliver through registered callbacks; the
- * start/stop calls themselves are non-blocking.
- *
- * No pairing / bonding policy here. Higher layers decide whether to require
- * encryption or persist keys. The default of every implementation is
- * "Just Works", no IO capability, no persisted bond.
- *
- * Implemented by whichever platform integration package is loaded at runtime.
- * The integration package registers its concrete driver with
- * DekiBLE::SetCurrent at package load. Single-active: one BT controller per
- * chip, no multi-provider registry needed for this category.
- */
+/// A BLE radio.
+///
+/// Covers the four BLE roles: scan (observer/central), advertise
+/// (broadcaster/peripheral), GATT server and GATT client. Events (scan
+/// results, GATT writes from a remote central, incoming notifications) arrive
+/// through registered callbacks; the start/stop calls do not block.
+///
+/// Pairing and bonding policy belongs to higher layers, which decide whether
+/// to require encryption or keep keys. Every implementation defaults to
+/// "Just Works", no IO capability, no stored bond.
+///
+/// Implemented by the platform integration package loaded at runtime, which
+/// registers its driver with DekiBLE::SetCurrent when it loads. One active
+/// driver: a chip has one BT controller.
 class IDekiBLE : public Deki::IPackage
 {
 public:
@@ -185,26 +160,25 @@ public:
     // Scanning (observer / central)
     // -------------------------------------------------------------------------
 
-    /// Start scanning for nearby advertisers. Non-blocking: results stream
-    /// through the callback registered via SetScanCallback. `intervalMs` and
-    /// `windowMs` are the BLE scan interval/window (window <= interval).
-    /// `active` requests scan responses; passive listening only when false.
-    /// durationMs=0 means scan until StopScan; otherwise auto-stop after the
-    /// duration elapses.
+    /// Starts scanning for nearby advertisers without blocking; results arrive
+    /// through the SetScanCallback callback. `intervalMs` and `windowMs` are
+    /// the BLE scan interval and window (window <= interval). `active` asks
+    /// for scan responses; false only listens. durationMs = 0 scans until
+    /// StopScan; otherwise the scan stops after that long.
     virtual bool StartScan(uint16_t intervalMs, uint16_t windowMs, bool active, uint32_t durationMs) = 0;
 
     virtual void StopScan() = 0;
 
-    /// The callback is invoked from the BLE host task. Keep work small; copy
-    /// out anything you need and post to your own queue.
+    /// The callback runs on the BLE host task. Keep it short: copy out what
+    /// you need and post it to your own queue.
     virtual void SetScanCallback(DekiBLEScanCb cb, void* user) = 0;
 
     // -------------------------------------------------------------------------
     // Advertising (broadcaster / peripheral)
     // -------------------------------------------------------------------------
 
-    /// Start advertising with the supplied payload. Replacing an in-flight
-    /// advertisement is allowed: the call stops the current one first.
+    /// Starts advertising `data`. If already advertising, the current
+    /// advertisement is stopped first.
     virtual bool StartAdvertising(const DekiBLEAdvData& data) = 0;
 
     virtual void StopAdvertising() = 0;
@@ -215,23 +189,21 @@ public:
     // GATT server
     // -------------------------------------------------------------------------
 
-    /// Register the supplied services as a GATT server. The backend fills
-    /// `valueHandle` in each DekiBLECharSpec on success. Calling
-    /// BuildGattServer again replaces the previously-registered services
-    /// (note: most stacks do not actually support re-registration; treat as
-    /// build-once and reset by Shutdown -> Initialize if you need to rebuild).
+    /// Registers `services` as a GATT server and, on success, fills
+    /// `valueHandle` in each DekiBLECharSpec. Calling it again replaces the
+    /// services, but most stacks do not support that: build once, and call
+    /// Shutdown then Initialize to rebuild.
     virtual bool BuildGattServer(DekiBLEServiceSpec* services, uint8_t count) = 0;
 
-    /// Push a notification (or indication, if the characteristic was declared
-    /// Indicate) to one connected central.
+    /// Sends a notification (an indication, if the characteristic was
+    /// declared Indicate) to one connected central.
     virtual bool NotifyValue(DekiBLEConnHandle conn, DekiBLECharHandle handle, const void* data, size_t len) = 0;
 
     virtual void SetCharWriteCallback(DekiBLECharWriteCb cb, void* user) = 0;
 
-    /// Read callback: backend supplies `out`/`maxLen`; callback returns the
-    /// number of bytes written into `out`, or a negative value to NACK the
-    /// read. Optional: if no callback is registered, the backend serves a
-    /// zero-length value.
+    /// The read callback gets `out`/`maxLen` and returns the number of bytes
+    /// written into `out`, or a negative value to refuse the read. Without a
+    /// callback, the backend serves a zero-length value.
     virtual void SetCharReadCallback(DekiBLECharReadCb cb, void* user) = 0;
 
     virtual void SetConnectionCallback(DekiBLEConnCb cb, void* user) = 0;
@@ -240,17 +212,18 @@ public:
     // GATT client
     // -------------------------------------------------------------------------
 
-    /// Queue a connection attempt to a remote peripheral. Non-blocking: the
-    /// outcome (success + new handle, or failure) arrives via the connection
-    /// callback. timeoutMs is the supervision timeout for the connect phase.
+    /// Starts connecting to a remote peripheral without blocking. The outcome
+    /// (success with the new handle, or failure) arrives through the
+    /// connection callback. timeoutMs is the supervision timeout for the
+    /// connect phase.
     virtual bool Connect(const DekiBLEAddress& addr, uint32_t timeoutMs) = 0;
 
     virtual void DisconnectClient(DekiBLEConnHandle conn) = 0;
 
-    /// Discover characteristics of a service on the remote. On success,
-    /// writes the first characteristic value handle into `outFirstHandle` and
-    /// the number discovered into `outCount`. The returned handles are
-    /// contiguous in attribute-handle order.
+    /// Discovers the characteristics of a service on the remote. On success,
+    /// writes the first characteristic's value handle to `outFirstHandle` and
+    /// the number found to `outCount`; the handles are contiguous in
+    /// attribute-handle order.
     virtual bool DiscoverService(DekiBLEConnHandle conn, const DekiBLEUUID& service, DekiBLECharHandle* outFirstHandle,
                                  uint8_t* outCount) = 0;
 
@@ -259,9 +232,9 @@ public:
     virtual bool WriteRemote(DekiBLEConnHandle conn, DekiBLECharHandle handle, const void* data, size_t len,
                              bool withResponse) = 0;
 
-    /// Subscribe/unsubscribe to notifications by writing the CCCD descriptor
-    /// immediately after `handle`. Incoming notifications surface through
-    /// the notify callback.
+    /// Subscribes or unsubscribes to notifications by writing the CCCD
+    /// descriptor right after `handle`. Notifications arrive through the
+    /// notify callback.
     virtual bool Subscribe(DekiBLEConnHandle conn, DekiBLECharHandle handle, bool enable) = 0;
 
     virtual void SetNotifyCallback(DekiBLENotifyCb cb, void* user) = 0;
@@ -270,8 +243,8 @@ public:
     // Lifecycle
     // -------------------------------------------------------------------------
 
-    /// Tear down the BLE stack. Free advertise/scan/GATT state. Calling
-    /// Initialize afterwards restarts from scratch.
+    /// Stops the BLE stack and frees the advertise, scan and GATT state.
+    /// Initialize afterwards starts from scratch.
     virtual void Shutdown() = 0;
 };
 

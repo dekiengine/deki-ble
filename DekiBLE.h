@@ -6,19 +6,13 @@
 namespace DekiBle
 {
 
-/**
- * @brief Active-driver registry for BLE (single-instance).
- *
- * Mirrors the DekiWifi::DekiWiFi / DekiHttp pattern: a platform integration package
- * Consumers (game code, BLE-backed sensors, provisioning helpers) reach the
- * active driver via GetCurrent.
- *
- * Single-active rather than the multi-provider registry pattern: there is
- * one BT controller per chip, swapping the driver at runtime is not a
- * realistic use case. If a board ever ships a secondary controller, this
- * category can switch to the multi-provider pattern without changing the
- * consumer call sites.
- */
+/// Holds the one active BLE driver, like DekiWifi::DekiWiFi and DekiHttp: a
+/// platform integration package sets it with SetCurrent, and users (game code,
+/// BLE sensors, provisioning helpers) reach it with GetCurrent.
+///
+/// One active driver, not a multi-provider registry: a chip has one BT
+/// controller. If a board ever has a second one, this can become a
+/// multi-provider registry without changing the call sites.
 class DEKI_BLE_API DekiBLE
 {
 public:
